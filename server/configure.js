@@ -6,8 +6,28 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const methodOverride = require('method-override');
 const errorHandler = require('errorhandler');
+const moment = require('moment');
+
+const routes = require('./routes');
 
 module.exports = function(app) {
+  // app.engine('handlebars', exphbs());
+  
+  // 定义 moment 全局语言
+  moment.locale('zh-cn');
+ 
+  app.engine(
+    'handlebars',
+    exphbs.create({
+      helpers: {
+        timeago: function(timestamp) {
+          return moment(timestamp).startOf('minute').fromNow();
+        },
+      },
+    }).engine,
+  );
+  app.set('view engine', 'handlebars');
+
   app.use(morgan('dev'));
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
@@ -19,5 +39,6 @@ module.exports = function(app) {
     app.use(errorHandler());
   }
 
+  routes(app);
   return app;
 };
